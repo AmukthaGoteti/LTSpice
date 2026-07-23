@@ -23,13 +23,22 @@ Built to demonstrate practical analog/mixed-signal design and verification skill
 
 ```
 ltspice-analog-portfolio/
-├── 01-beginner/            projects 1–10
-├── 02-intermediate/        projects 11–20
-├── 03-advanced/            projects 21–29
-├── capstone/               project 30
-└── docs/
-    ├── concepts-glossary.md
-    └── simulation-cheatsheet.md
+├── README.md                     ← portfolio overview (see below)
+├── 01-beginner/
+│   ├── 01-rc-filters/
+│   ├── 02-rlc-resonance/
+│   ├── ... (through project 10)
+├── 02-intermediate/
+│   ├── 11-two-stage-opamp/
+│   ├── ... (through project 20)
+├── 03-advanced/
+│   ├── 21-ldo-stability/
+│   ├── ... (through project 30)
+├── docs/
+│   ├── concepts-glossary.md       ← your own plain-English notes on each concept
+│   └── simulation-cheatsheet.md   ← your personal LTspice syntax reference
+└── capstone/
+    └── 30-signal-chain/           ← flagship project, linked prominently from top README
 ```
 
 Each project folder contains:
