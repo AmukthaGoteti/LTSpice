@@ -26,6 +26,8 @@ ltspice-analog-portfolio/
 ├── README.md                     ← portfolio overview (see below)
 ├── 01-beginner/
 │   ├── 01-rc-filters/
+│   │       ├── 01-rc-filters/
+│   │               ├── low-pass/
 │   ├── 02-rlc-resonance/
 │   ├── ... (through project 10)
 ├── 02-intermediate/
