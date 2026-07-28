@@ -138,6 +138,7 @@ ltspice-analog-portfolio/
 │   ├── 01-rc-filters/
 │   │       ├── 01-rc-filters/
 │   │               ├── low-pass/
+│   │               ├── high-pass/
 │   ├── 02-rlc-resonance/
 │   ├── ... (through project 10)
 ├── 02-intermediate/
