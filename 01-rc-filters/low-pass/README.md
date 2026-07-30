@@ -33,7 +33,7 @@ To design for a desired cutoff $f_c$:
 **Example:** Choose $C = 0.1\ \mu\text{F}$ and $R = 10K\ \Omega$:
 
 $$
-f_c = \frac{1}{2\pi (10\times10^{3})(0.1\times10^{-6})} \approx 1.59 \times 10^{-1}\ \text{Hz} = 1.59 \times 10^{-1} \text{kHz}
+f_c = \frac{1}{2\pi (10\times10^{3})(0.1\times10^{-6})} \approx 159 \text{Hz} = 1.59 \times 10^{-1} \text{kHz}
 $$
 
 ## 4. Applications
