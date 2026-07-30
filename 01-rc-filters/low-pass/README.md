@@ -22,58 +22,7 @@ Series resistor **R**, shunt capacitor **C** to ground. Output is taken across t
 
 Physically, the capacitor can't charge/discharge instantly. Fast (high-frequency) wiggles in $V_{in}$ get smoothed out before $V_{out}$ can follow them; slow changes have time to fully charge the cap, so they pass through unchanged.
 
-## 3. Derivation (frequency domain)
-
-Treat it as a voltage divider between R and $Z_C$:
-
-$$
-\frac{V_{out}}{V_{in}} = \frac{Z_C}{R + Z_C} = \frac{\frac{1}{j\omega C}}{R + \frac{1}{j\omega C}} = \frac{1}{1 + j\omega RC}
-$$
-
-Define the **time constant**:
-$$
-\tau = RC
-$$
-
-and the **cutoff (corner) frequency**, where output power drops to half (magnitude drops to $1/\sqrt2$):
-$$
-\omega_c = \frac{1}{RC} \quad\Longrightarrow\quad f_c = \frac{1}{2\pi RC}
-$$
-
-So the transfer function is:
-$$
-H(j\omega) = \frac{1}{1 + j\,\omega/\omega_c}
-$$
-
-**Magnitude:**
-$$
-|H(j\omega)| = \frac{1}{\sqrt{1 + (\omega/\omega_c)^2}}
-$$
-
-**Phase:**
-$$
-\angle H(j\omega) = -\tan^{-1}\!\left(\frac{\omega}{\omega_c}\right)
-$$
-
-### Bode plot behavior
-| Region | Magnitude | Slope | Phase |
-|---|---|---|---|
-| $\omega \ll \omega_c$ | ≈ 1 (0 dB) | flat | ≈ 0° |
-| $\omega = \omega_c$ | $1/\sqrt2$ (−3 dB) | — | −45° |
-| $\omega \gg \omega_c$ | falls off | **−20 dB/decade** | → −90° |
-
-## 4. Time-domain response (step input)
-
-For a step input of amplitude $V_0$, solving the RC charging ODE gives:
-$$
-V_{out}(t) = V_0\left(1 - e^{-t/RC}\right)
-$$
-
-- At $t = RC$: output reaches **63.2%** of final value.
-- At $t = 5RC$: output is >99% settled (common "settling time" rule of thumb).
-- This is the same math as any first-order RC charging circuit — the low-pass filter *is* an RC charging circuit, just viewed in the frequency domain.
-
-## 5. Design procedure
+## 3. Design procedure
 
 To design for a desired cutoff $f_c$:
 1. Pick a practical capacitor value $C$ (µF to pF range depending on application).
@@ -88,7 +37,7 @@ $$
 R = \frac{1}{2\pi (1000)(100\times10^{-9})} \approx 1.59\ \text{k}\Omega
 $$
 
-## 6. Applications
+## 4. Applications
 
 - **Anti-aliasing filter** before an ADC — removes high-frequency content that would fold back (alias) into the sampled signal.
 - **Signal smoothing / noise reduction** — removing high-frequency noise from sensor signals.
@@ -97,13 +46,13 @@ $$
 - **PWM-to-analog conversion** — averaging a PWM signal into a DC-like voltage (common in microcontroller DAC-less analog output).
 - **Envelope detection** stage (paired with a rectifier).
 
-## 7. Key limitations to know
+## 5. Key limitations to know
 
 - **Not a brick-wall filter** — only −20 dB/decade roll-off; for sharper cutoff you need higher-order filters (cascaded RC stages, active filters, etc.).
 - **Loading effects** — an RC low-pass is not a true op-amp buffer stage; connecting a low-impedance load distorts the response. Buffer with an op-amp (active RC filter) if needed.
 - **No gain** — passive RC filters can only attenuate, never amplify (max gain = 1, i.e., 0 dB).
 
-## 8. Quick-reference formulas
+## 6. Quick-reference formulas
 
 | Quantity | Formula |
 |---|---|
@@ -112,5 +61,4 @@ $$
 | Transfer function | $H(j\omega) = \dfrac{1}{1+j\omega RC}$ |
 | Magnitude | $\|H\| = \dfrac{1}{\sqrt{1+(\omega RC)^2}}$ |
 | Phase | $-\tan^{-1}(\omega RC)$ |
-| Step response | $V_0(1-e^{-t/RC})$ |
 | Roll-off | −20 dB/decade above $f_c$ |
