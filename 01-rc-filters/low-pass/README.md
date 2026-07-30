@@ -26,15 +26,16 @@ Physically, the capacitor can't charge/discharge instantly. Fast (high-frequency
 
 To design for a desired cutoff $f_c$:
 1. Pick a practical capacitor value $C$ (µF to pF range depending on application).
-2. Solve for R:
+2. Pick a practical resistance value $R$ (Ω to kΩ range depending on application)
+3. Solve for $f_c$:
 $$
 R = \frac{1}{2\pi f_c C}
 $$
 3. Check loading: the source driving this filter should have low output impedance compared to R, and whatever load follows should have high input impedance compared to $Z_C$ at the frequencies of interest — otherwise the divider ratio shifts.
 
-**Example:** Want $f_c = 1\text{ kHz}$, choose $C = 100\text{ nF}$:
+**Example:** Want $f_c = 10\text{ kΩ}$, choose $C = 0.1\text{ µF}$:
 $$
-R = \frac{1}{2\pi (1000)(100\times10^{-9})} \approx 1.59\ \text{k}\Omega
+f_c = \frac{1}{2\pi (0.1\times10^{-2})} \approx 1.59\times 10^3 \text{khz}
 $$
 
 ## 4. Applications
