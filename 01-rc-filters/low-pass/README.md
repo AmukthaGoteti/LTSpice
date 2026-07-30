@@ -30,10 +30,10 @@ To design for a desired cutoff $f_c$:
 3. Solve for $f_c$: $\ f_c = \dfrac{1}{2\pi R C}$
 4. Check loading: the source driving this filter should have low output impedance compared to R, and whatever load follows should have high input impedance compared to $Z_C$ at the frequencies of interest — otherwise the divider ratio shifts.
 
-**Example:** Choose $C = 0.1\ \mu\text{F}$ and $R = 159\ \Omega$:
+**Example:** Choose $C = 0.1\ \mu\text{F}$ and $R = 10K\ \Omega$:
 
 $$
-f_c = \frac{1}{2\pi (159)(0.1\times10^{-6})} \approx 1.0 \times 10^4\ \text{Hz} = 10\ \text{kHz}
+f_c = \frac{1}{2\pi (10\times10^{3})(0.1\times10^{-6})} \approx 1.0 \times 10^4\ \text{Hz} = 10\ \text{kHz}
 $$
 
 ## 4. Applications
