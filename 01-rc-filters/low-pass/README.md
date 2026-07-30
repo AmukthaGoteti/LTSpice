@@ -28,17 +28,17 @@ To design for a desired cutoff $f_c$:
 1. Pick a practical capacitor value $C$ (µF to pF range depending on application).
 2. Pick a practical resistance value $R$ (Ω to kΩ range depending on application).
 3. Solve for $f_c$:
-$
+$$
 f_c = \frac{1}{2\pi R C}
-$
+$$
 4. Check loading: the source driving this filter should have low output impedance compared to R, and whatever load follows should have high input impedance compared to $Z_C$ at the frequencies of interest — otherwise the divider ratio shifts.
 
 **Example:** Choose $C = 0.1\ \mu\text{F}$ and $R = 159\ \Omega$:
-$
+$$
 f_c = \frac{1}{2\pi (159)(0.1\times10^{-6})}
 \approx 1.0 \times 10^4\ \text{Hz}
 = 10\ \text{kHz}
-$
+$$
 
 ## 4. Applications
 
