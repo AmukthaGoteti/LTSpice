@@ -1,45 +1,116 @@
-# RC Low-Pass Filter
+# RC Low-Pass Filter — Notes
 
-This project contains an LTspice simulation of a first-order RC low-pass filter. It shows how a resistor-capacitor network can smooth a pulsed input signal and reduce fast transitions at the output.
+## 1. Circuit
 
-## Circuit Overview
+```
+        R
+  Vin o--/\/\/\--+------o Vout
+                  |
+                 ===  C
+                  |
+  GND o-----------+------o GND
+```
 
-The schematic in [RC_Low_Pass_Filter.asc](RC_Low_Pass_Filter.asc) uses:
+Series resistor **R**, shunt capacitor **C** to ground. Output is taken across the capacitor.
 
-- Input source: a pulsed voltage source switching between 0 V and 5 V
-- Resistor: 10 kΩ
-- Capacitor: 0.1 µF
-- Output taken across the capacitor
+## 2. Intuition
 
-This is a standard passive low-pass filter with the cutoff frequency:
+- A capacitor's impedance is $Z_C = \dfrac{1}{j\omega C}$ — it's large at low frequencies (acts like an open circuit) and small at high frequencies (acts like a short).
+- At **low frequency**: $Z_C \gg R$, so almost all of $V_{in}$ appears across C → $V_{out} \approx V_{in}$.
+- At **high frequency**: $Z_C \ll R$, so the capacitor shorts the output to ground → $V_{out} \to 0$.
+- Net effect: low frequencies pass through, high frequencies are attenuated — hence **low-pass**.
 
-$$f_c = \frac{1}{2\pi RC}$$
+Physically, the capacitor can't charge/discharge instantly. Fast (high-frequency) wiggles in $V_{in}$ get smoothed out before $V_{out}$ can follow them; slow changes have time to fully charge the cap, so they pass through unchanged.
 
-Using $R = 10\,k\Omega$ and $C = 0.1\,\mu F$:
+## 3. Derivation (frequency domain)
 
-$$f_c \approx 159\,Hz$$
+Treat it as a voltage divider between R and $Z_C$:
 
-The time constant is:
+$$
+\frac{V_{out}}{V_{in}} = \frac{Z_C}{R + Z_C} = \frac{\frac{1}{j\omega C}}{R + \frac{1}{j\omega C}} = \frac{1}{1 + j\omega RC}
+$$
 
-$$\tau = RC = 1\,ms$$
+Define the **time constant**:
+$$
+\tau = RC
+$$
 
-## What the Simulation Demonstrates
+and the **cutoff (corner) frequency**, where output power drops to half (magnitude drops to $1/\sqrt2$):
+$$
+\omega_c = \frac{1}{RC} \quad\Longrightarrow\quad f_c = \frac{1}{2\pi RC}
+$$
 
-- The output responds more slowly than the input.
-- Sharp edges are rounded off as the capacitor charges and discharges.
-- The circuit acts as a smoothing filter for high-frequency components.
+So the transfer function is:
+$$
+H(j\omega) = \frac{1}{1 + j\,\omega/\omega_c}
+$$
 
-## Files
+**Magnitude:**
+$$
+|H(j\omega)| = \frac{1}{\sqrt{1 + (\omega/\omega_c)^2}}
+$$
 
-- [RC_Low_Pass_Filter.asc](RC_Low_Pass_Filter.asc) — LTspice schematic
-- [RC_Low_Pass_Filter.plt](RC_Low_Pass_Filter.plt) — saved waveform plot configuration
+**Phase:**
+$$
+\angle H(j\omega) = -\tan^{-1}\!\left(\frac{\omega}{\omega_c}\right)
+$$
 
-## How to Use
+### Bode plot behavior
+| Region | Magnitude | Slope | Phase |
+|---|---|---|---|
+| $\omega \ll \omega_c$ | ≈ 1 (0 dB) | flat | ≈ 0° |
+| $\omega = \omega_c$ | $1/\sqrt2$ (−3 dB) | — | −45° |
+| $\omega \gg \omega_c$ | falls off | **−20 dB/decade** | → −90° |
 
-1. Open [RC_Low_Pass_Filter.asc](RC_Low_Pass_Filter.asc) in LTspice.
-2. Run the transient analysis defined in the schematic.
-3. Observe the input and output waveforms to see the filtering behavior.
+## 4. Time-domain response (step input)
 
-## Notes
+For a step input of amplitude $V_0$, solving the RC charging ODE gives:
+$$
+V_{out}(t) = V_0\left(1 - e^{-t/RC}\right)
+$$
 
-The simulation uses a transient analysis over 60 ms, which is sufficient to observe the charging and discharging behavior of the capacitor clearly.
+- At $t = RC$: output reaches **63.2%** of final value.
+- At $t = 5RC$: output is >99% settled (common "settling time" rule of thumb).
+- This is the same math as any first-order RC charging circuit — the low-pass filter *is* an RC charging circuit, just viewed in the frequency domain.
+
+## 5. Design procedure
+
+To design for a desired cutoff $f_c$:
+1. Pick a practical capacitor value $C$ (µF to pF range depending on application).
+2. Solve for R:
+$$
+R = \frac{1}{2\pi f_c C}
+$$
+3. Check loading: the source driving this filter should have low output impedance compared to R, and whatever load follows should have high input impedance compared to $Z_C$ at the frequencies of interest — otherwise the divider ratio shifts.
+
+**Example:** Want $f_c = 1\text{ kHz}$, choose $C = 100\text{ nF}$:
+$$
+R = \frac{1}{2\pi (1000)(100\times10^{-9})} \approx 1.59\ \text{k}\Omega
+$$
+
+## 6. Applications
+
+- **Anti-aliasing filter** before an ADC — removes high-frequency content that would fold back (alias) into the sampled signal.
+- **Signal smoothing / noise reduction** — removing high-frequency noise from sensor signals.
+- **Audio tone controls** — bass-pass / treble-cut networks.
+- **Power supply decoupling / ripple filtering** — smoothing rectified DC.
+- **PWM-to-analog conversion** — averaging a PWM signal into a DC-like voltage (common in microcontroller DAC-less analog output).
+- **Envelope detection** stage (paired with a rectifier).
+
+## 7. Key limitations to know
+
+- **Not a brick-wall filter** — only −20 dB/decade roll-off; for sharper cutoff you need higher-order filters (cascaded RC stages, active filters, etc.).
+- **Loading effects** — an RC low-pass is not a true op-amp buffer stage; connecting a low-impedance load distorts the response. Buffer with an op-amp (active RC filter) if needed.
+- **No gain** — passive RC filters can only attenuate, never amplify (max gain = 1, i.e., 0 dB).
+
+## 8. Quick-reference formulas
+
+| Quantity | Formula |
+|---|---|
+| Time constant | $\tau = RC$ |
+| Cutoff frequency | $f_c = \dfrac{1}{2\pi RC}$ |
+| Transfer function | $H(j\omega) = \dfrac{1}{1+j\omega RC}$ |
+| Magnitude | $\|H\| = \dfrac{1}{\sqrt{1+(\omega RC)^2}}$ |
+| Phase | $-\tan^{-1}(\omega RC)$ |
+| Step response | $V_0(1-e^{-t/RC})$ |
+| Roll-off | −20 dB/decade above $f_c$ |
