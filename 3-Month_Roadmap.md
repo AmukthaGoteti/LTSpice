@@ -89,7 +89,7 @@ Each project folder should contain:
 ```
 /project-XX-name/
     schematic.asc
-    plots/            (Bode plots, transient waveforms, FFT, Monte Carlo histograms)
+    plots/
     README.md
 ```
 
