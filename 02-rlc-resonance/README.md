@@ -502,4 +502,171 @@ A: Bandwidth is defined as the frequency span between the two half-power points,
 
 ---
 
+---
+
+## 8. Second-Order Response — Step (Transient) Response
+
+A series RLC circuit is a classic **second-order system**. Writing KVL around the loop with the capacitor voltage $v_C(t)$ as the state variable:
+
+$$L\frac{d^2v_C}{dt^2} + R\frac{dv_C}{dt} + \frac{1}{C}v_C = \frac{1}{C}V_{step}$$
+
+Dividing through by $L$ and comparing to the standard second-order form $\ddot{x} + 2\zeta\omega_n\dot{x} + \omega_n^2 x = \omega_n^2 x_{final}$:
+
+$$\omega_n = \frac{1}{\sqrt{LC}} \qquad \zeta = \frac{R}{2}\sqrt{\frac{C}{L}} = \frac{1}{2Q}$$
+
+- $\omega_n$ = **undamped natural frequency** (rad/s) — numerically equal to $\omega_0$, the resonant angular frequency from Section 2.6
+- $\zeta$ = **damping ratio** (dimensionless) — determines whether the response is overdamped ($\zeta>1$), critically damped ($\zeta=1$), or underdamped ($\zeta<1$, oscillatory)
+- **Note the inverse relationship**: $\zeta = 1/(2Q)$ — a **high-Q** circuit is **lightly damped** (sharp resonance, long-lived oscillation), while a **low-Q** circuit is **heavily damped** (broad resonance, oscillation dies out fast). This is the same physics viewed from two different domains (frequency vs. time).
+
+### 8.1 For This Circuit (R=100Ω, L=10mH, C=100nF)
+
+$$\zeta = \frac{100}{2}\sqrt{\frac{100\times10^{-9}}{0.01}} = 50\sqrt{10^{-5}} = 50 \times 3.1623\times10^{-3} = 0.1581$$
+
+Since $\zeta = 0.1581 < 1$, the circuit is **underdamped** — expect decaying oscillation, matching the earlier finding that $Q = 3.162$ (moderate Q, visibly ringing step response).
+
+$$\omega_n = \omega_0 = 31{,}622.8\ \text{rad/s} \qquad \omega_d = \omega_n\sqrt{1-\zeta^2} = 31{,}622.8\sqrt{1-0.025} = 31{,}223\ \text{rad/s}$$
+
+$$f_d = \frac{\omega_d}{2\pi} = 4969.6\ \text{Hz} \quad \text{(the actual oscillation frequency you'll see in the ringing, slightly below } f_0\text{)}$$
+
+**Underdamped step response** (capacitor voltage, step input $V$ applied at $t=0$):
+
+$$v_C(t) = V\left[1 - \frac{1}{\sqrt{1-\zeta^2}}e^{-\zeta\omega_n t}\sin(\omega_d t + \phi)\right], \qquad \phi = \cos^{-1}(\zeta)$$
+
+Current follows from $i(t) = C\dfrac{dv_C}{dt}$.
+
+**Key transient metrics:**
+
+| Metric | Formula | Value (this circuit) |
+|---|---|---|
+| Damping ratio $\zeta$ | $\frac{R}{2}\sqrt{C/L} = 1/(2Q)$ | 0.1581 |
+| Damped frequency $f_d$ | $\frac{\omega_n\sqrt{1-\zeta^2}}{2\pi}$ | 4969.6 Hz |
+| % Overshoot | $e^{-\zeta\pi/\sqrt{1-\zeta^2}} \times 100$ | 60.4% |
+| Peak time $t_p$ | $\pi/\omega_d$ | 100.6 μs |
+| Settling time (2%) $t_s$ | $4/(\zeta\omega_n)$ | 0.8 ms |
+
+**Interpretation:** With $Q\approx3.16$ this circuit is moderately underdamped — you'll see roughly 60% overshoot and a handful of visibly decaying oscillation cycles in $v_C(t)$ before it settles near $V$, with $i(t)$ showing a decaying oscillation that starts and ends at zero (since steady-state series current through a capacitor under a DC step is zero).
+
+### 8.2 Verifying in LTspice
+
+1. Change **V1** to a **PULSE** or **step-like** source for transient analysis: right-click V1 → set `PULSE(0 1 0 1n 1n 10m 20m)` (0V to 1V step, ~instant rise, held for 10ms).
+2. Replace the `.ac` directive with a transient directive: `.tran 0 2m 0 1u` (simulate 0 to 2ms, max timestep 1μs for smooth resolution of the ringing).
+3. Run, then plot `V(N003)` (capacitor voltage) and `I(R1)` (current) vs. time.
+4. Use cursors to confirm: overshoot peak near $t_p\approx100.6\,\mu s$, oscillation period $\approx 1/f_d \approx 201\,\mu s$, and settling within $\approx0.8\,ms$.
+
+### 8.3 Python Code — Step Response Plot
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+R, L, C, V = 100, 10e-3, 100e-9, 1.0
+wn = 1/np.sqrt(L*C)
+zeta = (R/2)*np.sqrt(C/L)
+wd = wn*np.sqrt(1-zeta**2)
+phi = np.arccos(zeta)
+
+t = np.linspace(0, 2e-3, 2000)
+env = np.exp(-zeta*wn*t)
+vc = V*(1 - (1/np.sqrt(1-zeta**2))*env*np.sin(wd*t+phi))
+dvc = (1/np.sqrt(1-zeta**2))*env*(zeta*wn*np.sin(wd*t+phi) - wd*np.cos(wd*t+phi))
+i_ma = C*dvc*1000  # mA
+
+fig, axs = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
+axs[0].plot(t*1000, vc)
+axs[0].set_ylabel("V_C (V)")
+axs[0].set_title("Series RLC step response (underdamped)")
+axs[0].grid(True, alpha=0.3)
+
+axs[1].plot(t*1000, i_ma, color='tab:orange')
+axs[1].set_ylabel("i (mA)")
+axs[1].set_xlabel("time (ms)")
+axs[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig("step_response.png", dpi=150)
+plt.show()
+
+print(f"zeta={zeta:.4f}, wn={wn:.1f} rad/s, wd={wd:.1f} rad/s, fd={wd/2/np.pi:.1f} Hz")
+print(f"overshoot={np.exp(-zeta*np.pi/np.sqrt(1-zeta**2))*100:.1f}%")
+print(f"settling time (2%) = {4/(zeta*wn)*1000:.3f} ms")
+```
+
+---
+
+## 9. Q-Factor Plots
+
+### 9.1 Frequency Response for Different Q Values (Same $f_0$)
+
+Holding $L$ and $C$ fixed (so $f_0$ stays constant) and varying only $R$ shows directly how $Q = \omega_0 L/R$ controls the **sharpness** of the resonance peak:
+
+| $R$ (Ω) | $Q = 316.23/R$ | Peak character |
+|---|---|---|
+| 20 | 15.81 | Very sharp, tall, narrow peak |
+| 50 | 6.32 | Sharp peak |
+| 100 | 3.16 | Moderate peak (this guide's example) |
+| 200 | 1.58 | Broad peak |
+| 500 | 0.63 | Very broad, low peak (heavily damped) |
+
+**Why this happens:** $I_{max} = V/R$ — smaller $R$ directly gives a taller peak. Simultaneously, $BW = R/(2\pi L)$ — smaller $R$ also gives a narrower bandwidth. Both effects compound: low-R circuits are tall *and* narrow (high Q), high-R circuits are short *and* wide (low Q). The resonant frequency $f_0$ itself is untouched by $R$, since $f_0$ depends only on $L$ and $C$.
+
+### 9.2 Q vs. R Relationship
+
+Since $Q = \dfrac{\omega_0 L}{R}$ with $\omega_0$ and $L$ fixed, $Q$ is **inversely proportional to R** — a hyperbola. Doubling $R$ exactly halves $Q$; this is a direct, simple design lever: to sharpen a resonant filter, reduce series resistance (parasitic or intentional); to broaden it, add series resistance.
+
+Equivalently, in terms of damping ratio: $\zeta = 1/(2Q)$, so **increasing R increases damping** — consistent with Section 8's finding that higher Q (lower R) circuits ring longer in the time domain.
+
+### 9.3 Python Code — Q-Factor Plots
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+L, C, V = 10e-3, 100e-9, 1.0
+Rs = [20, 50, 100, 200, 500]
+f = np.logspace(2, 5, 500)  # 100 Hz to 100 kHz
+w = 2*np.pi*f
+w0 = 1/np.sqrt(L*C)
+
+# --- Frequency response overlay for varying Q ---
+plt.figure(figsize=(8, 5))
+for R in Rs:
+    XL = w*L
+    XC = 1/(w*C)
+    Z = np.sqrt(R**2 + (XL-XC)**2)
+    I = (V/Z)*1000
+    Q = w0*L/R
+    plt.semilogx(f, I, label=f"R={R}Ω, Q={Q:.2f}")
+
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Current (mA)")
+plt.title("Effect of Q-factor on resonance sharpness (fixed L, C)")
+plt.legend()
+plt.grid(True, which="both", alpha=0.3)
+plt.tight_layout()
+plt.savefig("q_factor_response.png", dpi=150)
+plt.show()
+
+# --- Q vs R relationship ---
+plt.figure(figsize=(6, 4))
+R_range = np.linspace(10, 1000, 200)
+Q_range = w0*L/R_range
+plt.plot(R_range, Q_range)
+plt.xlabel("R (Ω)")
+plt.ylabel("Q factor")
+plt.title("Q vs R (L, C fixed) — hyperbolic relationship")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig("q_vs_r.png", dpi=150)
+plt.show()
+```
+
+### 9.4 Verifying in LTspice
+
+1. Add a **`.step param`** sweep: place a SPICE directive `.step param Rval list 20 50 100 200 500`, and set R1's value to `{Rval}` instead of a fixed number.
+2. Re-run the `.ac dec 200 100 100k` sweep — LTspice will overlay all five curves automatically on one plot.
+3. Use cursors on each trace to confirm peak current $\approx V/R$ and that all peaks align at the same $f_0\approx5033$ Hz.
+4. To see the Q vs R relationship numerically, read the peak current and half-power bandwidth (Section 4.7 method) for each stepped R, and compute $Q=f_0/BW$ — compare against $Q=316.23/R$.
+
+---
+
 *End of reference document. All formulas double-checked against standard derivations; worked values computed for R=100Ω, L=10mH, C=100nF, V=1V.*
