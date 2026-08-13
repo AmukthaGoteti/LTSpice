@@ -1,0 +1,6 @@
+LTspice 26.0.2 for MacOS
+Circuit: /Users/amukthagoteti/Documents/Amuktha/Projects/LTSpice/01-rc-filters/low-pass/Draft1.net
+Start Time: Sun Aug  9 22:15:55 2026
+Y:\Documents\Amuktha\Projects\LTSpice\01-rc-filters\low-pass\Draft1.net(3): No such parameter defined.
+R1 N001 IN {Rval}
+            ^^^^
