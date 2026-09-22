@@ -23,7 +23,9 @@ Built to demonstrate practical analog/mixed-signal design and verification skill
 
 ```
 ltspice-analog-portfolio/
-├── README.md                     ← portfolio overview (see below)
+├── README.md                           ← portfolio overview (see below)
+├── 3-Month_Roadmap.md                  ← roadmap overview (see below)
+├── 30_Projects_for_total_beginners.md  ← projects overview (see below)
 ├── 01-beginner/
 │   ├── 01-rc-filters/
 │   │       ├── 01-rc-filters/
