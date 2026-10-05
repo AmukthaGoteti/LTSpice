@@ -89,6 +89,7 @@ Each project folder should contain:
 ```
 /project-XX-name/
     schematic.asc
+    circuit-diagram.jpg
     plots/
     README.md
 ```
