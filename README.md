@@ -49,6 +49,7 @@ ltspice-analog-portfolio/
 Each project folder contains:
 ```
 schematic.asc
+circuit-diagram.jpg
 plots/
 README.md
 ```
