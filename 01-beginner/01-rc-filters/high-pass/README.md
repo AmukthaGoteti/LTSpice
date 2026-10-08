@@ -1,98 +1,22 @@
 # RC High-Pass Filter
-
-## Overview
-This project studies a first-order RC high-pass filter in LTspice. A high-pass filter allows signals above a certain cutoff frequency to pass while attenuating lower-frequency content. It is commonly used in coupling stages, AC coupling, and signal conditioning.
-
-The circuit is built from a series capacitor and a resistor to ground, forming a simple frequency-selective network.
-
-## Objective
-- Understand how a capacitor and resistor create a frequency-dependent response
-- Observe the gain and phase shift of a high-pass filter
-- Verify the cutoff frequency using LTspice AC analysis
-- Compare simulation results with the theoretical transfer function
-
-## Circuit Description
-The input signal is applied to the left side of the capacitor. The output is taken across the resistor to ground.
-
-In a first-order RC high-pass filter:
-- the capacitor is in series with the signal path
-- the resistor provides the return path to ground
-- low-frequency signals are blocked because the capacitor impedance is large
-- high-frequency signals pass because the capacitor impedance becomes small
-
-## Theory
-The transfer function for a first-order RC high-pass filter is:
-
-$$
-H(s) = \frac{sRC}{1 + sRC}
-$$
-
-where:
-- $R$ = resistance
-- $C$ = capacitance
-- $s = j\omega$
-
-The magnitude response is:
-
-$$
-|H(j\omega)| = \frac{\omega RC}{\sqrt{1 + (\omega RC)^2}}
-$$
-
-The cutoff frequency, or -3 dB point, is:
-
-$$
-f_c = \frac{1}{2\pi RC}
-$$
-
-This is the frequency where the output power drops to half of the passband value, and the amplitude is reduced by about 3 dB.
-
-## LTspice Implementation
-The schematic for this project is stored in:
-- `schematic.asc`
-
-This LTspice simulation uses:
-- AC source as the input stimulus
-- RC network as the frequency-selective stage
-- `.ac` analysis to sweep frequency over a wide range
-
-## Simulation Setup
-Open the schematic in LTspice and run:
-
-```spice
-.ac dec 100 1 1Meg
-```
-
-This performs an AC sweep from 1 Hz to 1 MHz with 100 points per decade.
-
-Then plot:
-- `V(out)`
-- `V(in)`
-- or the ratio `V(out)/V(in)` to visualize the filter response
-
-## Expected Behavior
-- At very low frequencies, the capacitor impedance is very large, so the output approaches zero
-- At mid frequencies, the response rises with frequency
-- At high frequencies, the output approaches the input amplitude
-- At the cutoff frequency, the output magnitude is reduced to about 70.7% of the input
-
-## Practical Interpretation
-A high-pass filter is useful when you want to remove DC offsets or low-frequency drift from a signal while preserving the variations that occur at higher frequencies. In audio and signal-processing systems, this is often used to discard unwanted low-frequency noise, hum, or DC components.
-
-## Files in This Project
-- `schematic.asc` — LTspice schematic
-- `plots/` — saved waveform and simulation plots
-- `README.md` — project notes and theory
-
-## Notes
-This example is intended as a beginner-friendly introduction to RC filter behavior. It is a good starting point before exploring second-order filters, resonance, and active filter design.
-
----
-
-### Summary
-An RC high-pass filter is the simplest way to pass AC signals while suppressing low-frequency or DC components. The key design parameter is the cutoff frequency:
-
-$$
-f_c = \frac{1}{2\pi RC}
-$$
-
-By changing the resistor or capacitor values, the filter can be tuned to pass different frequency ranges.
+### OBJECTIVE
+Build single-pole RC low-pass and high-pass filters, extract the -3 dB cutoff frequency, and characterize the magnitude/phase response with an AC sweep.
+### THEORY NOTES
+Cutoff frequency: fc = 1 / (2πRC).
+Magnitude rolls off at -20 dB/decade beyond fc (single pole).
+Phase transitions across 90° centered on fc: low-pass goes 0° → -90°, high-pass goes 90° → 0°.
+At fc exactly, magnitude is -3 dB and phase is ±45°.
+### LTSPICE WORKFLOW
+Place a resistor and capacitor in series between an AC input source and ground.
+For low-pass, take the output across the capacitor; for high-pass, take it across the resistor.
+Set the source's AC amplitude to 1 (SPICE directive AC 1) — the DC/transient value is irrelevant for an .ac sweep.
+Run '.ac dec 100 1 1Meg' to sweep 1 Hz to 1 MHz with 100 points per decade.
+Add trace V(out)/V(in); right-click the trace to display it in dB, and add a second plot pane for phase.
+Use cursors (or a .meas statement) to locate the -3 dB point and confirm it matches the calculated fc.
+### EXPECTED RESULTS
+Flat magnitude in the passband, -20 dB/decade slope beyond fc, -3 dB exactly at fc.
+Phase is 45° (LPF: -45°, HPF: +45°) at fc, asymptoting to 0°/90° well away from it.
+### COMMON PITFALLS
+Forgetting the AC 1 magnitude on the source — without it, the .ac sweep produces a flat zero trace.
+Probing the wrong node (e.g., across R when you meant to build an LPF).
+Cascading a second RC stage directly loads the first stage and shifts fc — a buffer is needed to keep the stages independent.
